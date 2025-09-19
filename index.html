@@ -1481,6 +1481,15 @@
             const calendarEl = document.getElementById('calendar');
             calendarEl.innerHTML = '';
             
+            // >>> PERUBAHAN DIMULAI
+        let current = state.currentCalendarView;
+        if (!(current instanceof Date)) {
+            current = new Date(current);
+            if (isNaN(current)) current = new Date();
+            state.currentCalendarView = current;
+        }
+        // >>> PERUBAHAN SELESAI
+
             DAYS.forEach(day => {
                 const card = document.createElement('div');
                 card.className = 'day-card';
@@ -1956,6 +1965,33 @@
                         saveState();
                         alert('Data berhasil diimpor!');
                         location.reload();
+                        function loadState() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+        try {
+            const parsed = JSON.parse(raw);
+            state = { ...state, ...parsed };
+
+            // >>> PERUBAHAN DIMULAI
+            // pastikan currentCalendarView berupa Date
+            if (state.currentCalendarView && !(state.currentCalendarView instanceof Date)) {
+                state.currentCalendarView = new Date(state.currentCalendarView);
+            }
+            // >>> PERUBAHAN SELESAI
+
+            DAYS.forEach(d => {
+                if (!state.tasks[d]) {
+                    state.tasks[d] = { 
+                        slot1: [], slot2: [], slot3: [], slot4: [], slot5: [] 
+                    };
+                }
+            });
+        } catch (e) {
+            console.warn('Error parsing saved data', e);
+        }
+    }
+}
+
                     } catch (error) {
                         alert('Error mengimpor data: Format file tidak valid');
                     }
